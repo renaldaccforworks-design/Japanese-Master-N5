@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self';">
+<title>Japanese Master N5</title>
+<style>
+:root {
+  --primary: #e74c3c;
+  --secondary: #c0392b;
+  --accent: #f39c12;
+  --bg: #1a1a2e;
+  --card: #16213e;
+  --text: #eee;
+  --success: #27ae60;
+  --danger: #e74c3c;
+  --warning: #f39c12;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+.screen { display:none; min-height:100vh; padding:20px; position:relative; }
+.screen.active { display:block; }
+.btn { padding:12px 24px; border:none; border-radius:8px; font-size:16px; cursor:pointer; transition:all 0.3s; font-weight:600; }
+.btn-primary { background:var(--primary); color:white; }
+.btn-primary:hover { background:var(--secondary); transform:translateY(-2px); }
+.btn-secondary { background:#34495e; color:white; }
+.btn-success { background:var(--success); color:white; }
+.btn-warning { background:var(--warning); color:white; }
+.btn-full { width:100%; margin-top:10px; }
+input, textarea { width:100%; padding:12px; border:2px solid #34495e; border-radius:8px; background:#0f3460; color:var(--text); font-size:16px; margin-top:5px; }
+input:focus, textarea:focus { outline:none; border-color:var(--primary); }
+.header { text-align:center; padding:20px; background:linear-gradient(135deg, var(--primary), var(--accent)); border-radius:15px; margin-bottom:20px; position:relative; }
+.header h1 { font-size:24px; text-shadow:2px 2px 4px rgba(0,0,0,0.3); }
+.settings-btn { position:absolute; left:15px; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.2); border:none; color:white; padding:10px; border-radius:50%; font-size:20px; cursor:pointer; }
+.settings-btn:hover { background:rgba(255,255,255,0.3); }
+.progress-bar { background:#34495e; border-radius:10px; height:20px; margin:15px 0; overflow:hidden; }
+.progress-fill { background:linear-gradient(90deg, var(--success), var(--accent)); height:100%; border-radius:10px; transition:width 0.5s; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold; }
+.levels-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:15px; padding-bottom:80px; }
+.level-card { background:var(--card); border-radius:12px; padding:15px; text-align:center; cursor:pointer; transition:all 0.3s; position:relative; border:2px solid transparent; }
+.level-card:hover { transform:translateY(-5px); box-shadow:0 5px 15px rgba(0,0,0,0.3); }
+.level-card.locked { opacity:0.5; cursor:not-allowed; }
+.level-card.locked:hover { transform:none; }
+.level-card.completed { border-color:var(--success); }
+.level-card.active-phase { border-color:var(--warning); }
+.level-card h3 { font-size:14px; margin-bottom:5px; }
+.level-card .level-num { font-size:24px; font-weight:bold; color:var(--accent); }
+.level-card .status { font-size:11px; margin-top:5px; padding:3px 8px; border-radius:10px; display:inline-block; }
+.status-locked { background:#e74c3c; color:white; }
+.status-available { background:#27ae60; color:white; }
+.status-completed { background:#3498db; color:white; }
+.status-srs { background:#f39c12; color:white; }
+.ad-badge { position:absolute; top:5px; right:5px; background:#f39c12; color:black; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold; }
+.back-btn { position:absolute; top:15px; left:15px; background:rgba(255,255,255,0.2); border:none; color:white; padding:10px 15px; border-radius:8px; cursor:pointer; font-size:14px; }
+.back-btn:hover { background:rgba(255,255,255,0.3); }
+.refresh-btn { position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.2); border:none; color:white; padding:10px; border-radius:8px; cursor:pointer; font-size:14px; }
+.refresh-btn:hover { background:rgba(255,255,255,0.3); }
+.explanation { background:var(--card); padding:20px; border-radius:12px; margin:15px 0; line-height:1.6; }
+.warning-box { background:linear-gradient(135deg, #e74c3c, #c0392b); padding:15px; border-radius:10px; margin:15px 0; font-size:14px; line-height:1.5; }
+.question-block { background:var(--card); padding:15px; border-radius:10px; margin:10px 0; border-left:4px solid var(--accent); }
+.question-block.answered { animation:pulse 0.5s; }
+.question-block.correct { border-left-color:var(--success); background:rgba(39,174,96,0.1); }
+.question-block.incorrect { border-left-color:var(--danger); background:rgba(231,76,60,0.1); }
+.question-block h4 { margin-bottom:10px; color:var(--accent); }
+.answer-input { margin-top:8px; }
+.correction { margin-top:8px; padding:10px; border-radius:6px; font-size:14px; display:none; }
+.correction.show { display:block; }
+.correction.correct { background:rgba(39,174,96,0.2); border:1px solid var(--success); }
+.correction.incorrect { background:rgba(231,76,60,0.2); border:1px solid var(--danger); }
+.submit-area { text-align:center; margin-top:30px; padding-bottom:30px; }
+.srs-timer { background:var(--card); padding:15px; border-radius:10px; margin:10px 0; text-align:center; border:2px solid var(--warning); }
+.srs-timer h4 { color:var(--warning); margin-bottom:5px; }
+.srs-timer .countdown { font-size:20px; font-weight:bold; color:var(--accent); }
+.checklist-box { background:linear-gradient(135deg, var(--success), #2ecc71); padding:20px; border-radius:12px; margin:20px 0; text-align:center; }
+.checklist-box h3 { font-size:20px; }
+.footer { text-align:center; padding:15px; color:#888; font-size:12px; border-top:1px solid #34495e; margin-top:20px; }
+.login-container { max-width:400px; margin:50px auto; padding:30px; background:var(--card); border-radius:15px; }
+.login-container h2 { text-align:center; margin-bottom:20px; color:var(--accent); }
+.login-container .divider { text-align:center; margin:20px 0; color:#888; }
+.settings-panel { position:fixed; top:0; left:-100%; width:85%; max-width:350px; height:100vh; background:var(--card); z-index:1000; transition:left 0.3s; overflow-y:auto; padding:20px; }
+.settings-panel.open { left:0; }
+.settings-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; display:none; }
+.settings-overlay.show { display:block; }
+.settings-item { padding:15px; border-bottom:1px solid #34495e; cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+.settings-item:hover { background:rgba(255,255,255,0.05); }
+.modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:2000; }
+.modal.show { display:flex; }
+.modal-content { background:var(--card); padding:30px; border-radius:15px; max-width:90%; width:400px; text-align:center; }
+.modal-content h3 { margin-bottom:15px; color:var(--accent); }
+.modal-buttons { display:flex; gap:10px; margin-top:20px; }
+.modal-buttons .btn { flex:1; }
+.theme-sakura { --primary:#ff6b9d; --accent:#c44569; background:linear-gradient(135deg, #1a1a2e, #16213e); }
+.theme-bamboo { --primary:#27ae60; --accent:#2ecc71; background:linear-gradient(135deg, #1a3a1a, #162e16); }
+.theme-night { --primary:#3498db; --accent:#9b59b6; background:linear-gradient(135deg, #0c0c1e, #1a1a3e); }
+.sakura-petal { position:fixed; width:20px; height:20px; background:#ff6b9d; border-radius:0 100% 0 100%; opacity:0.7; pointer-events:none; animation:fall linear infinite; z-index:-1; }
+@keyframes fall { 0% { transform:translateY(-100px) rotate(0deg); opacity:0.7; } 100% { transform:translateY(100vh) rotate(360deg); opacity:0; } }
+@keyframes pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.02); } }
+@keyframes answered-flash { 0% { box-shadow:0 0 0 rgba(255,255,255,0); } 50% { box-shadow:0 0 20px rgba(255,255,255,0.5); } 100% { box-shadow:0 0 0 rgba(255,255,255,0); } }
+.answered-flash { animation:answered-flash 0.5s; }
+.tab-buttons { display:flex; gap:5px; margin-bottom:15px; }
+.tab-btn { flex:1; padding:10px; background:#34495e; border:none; color:white; border-radius:8px; cursor:pointer; font-size:14px; }
+.tab-btn.active { background:var(--primary); }
+.stat-card { background:var(--card); padding:15px; border-radius:10px; margin:10px 0; }
+.stat-card h4 { color:var(--accent); margin-bottom:5px; }
+.stat-card .value { font-size:24px; font-weight:bold; }
+input[type="range"] { width:100%; margin-top:10px; }
+select { width:100%; padding:12px; border:2px solid #34495e; border-radius:8px; background:#0f3460; color:var(--text); font-size:16px; }
+.loading { text-align:center; padding:50px; }
+.loading .spinner { width:40px; height:40px; border:4px solid #34495e; border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.japanese-text { font-family:'Hiragino Sans','Yu Gothic',sans-serif; font-size:24px; text-align:center; margin:10px 0; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="screen active">
+  <div class="login-container">
+    <h2>🇯🇵 Japanese Master N5</h2>
+    <p style="text-align:center;margin-bottom:20px;color:#888;">Raih JLPT N5 dengan Mudah!</p>
+    
+    <div id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email Gmail" autocomplete="email">
+      <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
+      <button class="btn btn-primary btn-full" onclick="login()">🔐 Login</button>
+      <div class="divider">── atau ──</div>
+      <button class="btn btn-secondary btn-full" onclick="guestLogin()">👤 Login With Guest Account</button>
+      <p style="text-align:center;margin-top:15px;font-size:14px;">
+        Belum punya akun? <a href="#" onclick="showRegister()" style="color:var(--accent);">Daftar disini</a>
+      </p>
+    </div>
+    
+    <div id="registerForm" style="display:none;">
+      <input type="text" id="regName" placeholder="Nama Lengkap">
+      <input type="email" id="regEmail" placeholder="Email Gmail">
+      <input type="password" id="regPassword" placeholder="Password (min. 6 karakter)">
+      <input type="password" id="regConfirm" placeholder="Konfirmasi Password">
+      <button class="btn btn-primary btn-full" onclick="register()">📝 Daftar</button>
+      <p style="text-align:center;margin-top:15px;font-size:14px;">
+        Sudah punya akun? <a href="#" onclick="showLogin()" style="color:var(--accent);">Login disini</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- HOME SCREEN -->
+<div id="homeScreen" class="screen">
+  <div class="header">
+    <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+    <h1>🇯🇵 Japanese Master N5</h1>
+    <p id="welcomeText" style="margin-top:5px;font-size:14px;"></p>
+  </div>
+  
+  <div style="margin-bottom:15px;">
+    <h3 style="margin-bottom:5px;">📊 Progress Keseluruhan</h3>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%">0%</div>
+    </div>
+  </div>
+  
+  <h3 style="margin-bottom:10px;">📚 Pilih Level</h3>
+  <div class="levels-grid" id="levelsGrid"></div>
+  
+  <div class="footer">
+    <p>Penerbit: Renald Rasyad Aryasatya</p>
+    <p>Versi: 1.0.0</p>
+  </div>
+</div>
+
+<!-- LEVEL SCREEN -->
+<div id="levelScreen" class="screen">
+  <button class="back-btn" onclick="goHome()">← Kembali</button>
+  <button class="refresh-btn" onclick="refreshLevel()">🔄</button>
+  
+  <div style="margin-top:60px;">
+    <h2 id="levelTitle" style="text-align:center;margin-bottom:15px;"></h2>
+    
+    <div class="warning-box">
+      <strong>⚠️ Peringatan:</strong><br>
+      Apabila Anda Belum Bisa Menjawab Soalnya Berarti Anda Belum Memahami Penjelasannya. Silahkan Dipahami Terlebih Dahulu Sebelum Menjawab Pertanyaan/Tantangan.
+    </div>
+    
+    <div class="explanation" id="explanation"></div>
+    
+    <div class="warning-box" style="background:linear-gradient(135deg, #f39c12, #e67e22);">
+      <strong>⚠️ Peringatan Ke-2:</strong><br>
+      Apabila Anda Belum Bisa Menjawab Soalnya Berarti Anda Belum Memahami Penjelasannya. Silahkan Dipahami Terlebih Dahulu Sebelum Menjawab Pertanyaan/Tantangan.<br><br>
+      Apabila Terdapat Pertanyaan Menjawab dengan Huruf Bahasa Jepang (Hiragana, Katakana, Kanji) Ubah Setting Keyboard Google dengan Urutan:<br>
+      Download Gboard → Pilih Bahasa → Tambahkan Keyboard → Search 'Jepang' → Pilih 12 キー → Klik Selesai
+    </div>
+    
+    <h3 style="margin:20px 0 10px;">🧠 Pertanyaan Active Recall</h3>
+    <div id="questionsContainer"></div>
+    
+    <div class="warning-box" style="background:linear-gradient(135deg, #9b59b6, #8e44ad);">
+      <strong>⚠️ Peringatan Tantangan Praktik:</strong><br>
+      Setiap Tantangan Harus Ditulis di Lembar Kertas! Dengan Menulis Anda Tahu Praktiknya Itu Seperti Apa Bukan Hanya Dijawab Saja.<br><br>
+      Apabila Terdapat Pertanyaan Menjawab dengan Huruf Bahasa Jepang (Hiragana, Katakana, Kanji) Ubah Setting Keyboard Google dengan Urutan:<br>
+      Download Gboard → Pilih Bahasa → Tambahkan Keyboard → Search 'Jepang' → Pilih 12 キー → Klik Selesai
+    </div>
+    
+    <h3 style="margin:20px 0 10px;">✍️ Tantangan Praktik Langsung</h3>
+    <div id="challengesContainer"></div>
+    
+    <div class="submit-area">
+      <button class="btn btn-success" onclick="submitAllAnswers()" id="submitBtn" style="font-size:18px;padding:15px 40px;">
+        📤 Kirim Semua Jawaban
+      </button>
+    </div>
+    
+    <div id="srsSection" style="display:none;">
+      <h3 style="text-align:center;margin:20px 0 10px;">🔄 Metode SRS (Spaced Repetition System)</h3>
+      
+      <div class="srs-timer" id="srsPhase1">
+        <h4>📖 Fase 1 - Review 24 Jam</h4>
+        <div class="countdown" id="countdown1">--:--:--</div>
+        <button class="btn btn-warning btn-full" onclick="redoLevel(1)" id="redoBtn1" disabled>Kerjakan Ulang</button>
+      </div>
+      
+      <div class="srs-timer" id="srsPhase2">
+        <h4>📖 Fase 2 - Review 72 Jam</h4>
+        <div class="countdown" id="countdown2">--:--:--</div>
+        <button class="btn btn-warning btn-full" onclick="redoLevel(2)" id="redoBtn2" disabled>Kerjakan Ulang</button>
+      </div>
+      
+      <div class="srs-timer" id="srsPhase3">
+        <h4>📖 Fase 3 - Review 168 Jam (1 Minggu)</h4>
+        <div class="countdown" id="countdown3">--:--:--</div>
+        <button class="btn btn-warning btn-full" onclick="redoLevel(3)" id="redoBtn3" disabled>Kerjakan Ulang</button>
+      </div>
+    </div>
+    
+    <div class="checklist-box" id="checklistBox" style="display:none;">
+      <h3>✅ Level Selesai!</h3>
+      <p style="margin-top:10px;">Semua fase SRS telah diselesaikan dengan sempurna.</p>
+      <button class="btn btn-primary btn-full" onclick="completeLevel()" style="margin-top:15px;">
+        ✓ Tandai Selesai & Kembali
+      </button>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <p>Penerbit: Renald Rasyad Aryasatya</p>
+    <p>Versi: 1.0.0</p>
+  </div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div class="settings-overlay" id="settingsOverlay" onclick="toggleSettings()"></div>
+<div class="settings-panel" id="settingsPanel">
+  <h2 style="margin-bottom:20px;color:var(--accent);">⚙️ Pengaturan</h2>
+  
+  <div class="settings-item" onclick="showProfile()">
+    <span>👤 Profil</span><span>›</span>
+  </div>
+  
+  <div class="settings-item" onclick="showLanguage()">
+    <span>🌐 Bahasa</span><span>›</span>
+  </div>
+  
+  <div class="settings-item" onclick="refreshApp()">
+    <span>🔄 Refresh App</span><span>›</span>
+  </div>
+  
+  <div class="settings-item" onclick="showThemes()">
+    <span>🎨 Tema & Background</span><span>›</span>
+  </div>
+  
+  <div class="settings-item">
+    <span>🔊 Volume Sound</span>
+    <input type="range" min="0" max="100" value="80" id="volumeSlider" onchange="setVolume(this.value)" style="width:100px;">
+  </div>
+  
+  <div class="settings-item" onclick="showStats()">
+    <span>📊 Statistik</span><span>›</span>
+  </div>
+  
+  <div class="settings-item" onclick="sendFeedback()">
+    <span>📧 Feedback</span><span>›</span>
+  </div>
+  
+  <div class="settings-item">
+    <span>🎵 Backsound</span>
+    <select id="musicSelect" onchange="changeMusic(this.value)" style="width:120px;padding:5px;">
+      <option value="sakura">Sakura</option>
+      <option value="tabun">Tabun</option>
+      <option value="nightdancer">Night Dancer</option>
+      <option value="off">OFF</option>
+    </select>
+  </div>
+  
+  <div class="settings-item">
+    <span>💧 Sound Effect</span>
+    <label><input type="checkbox" id="sfxToggle" checked onchange="toggleSFX(this.checked)"> ON</label>
+  </div>
+  
+  <div class="settings-item" onclick="resetProgress()">
+    <span style="color:var(--danger);">🗑️ Reset Progress</span><span>›</span>
+  </div>
+  
+  <div class="settings-item" onclick="logout()">
+    <span style="color:var(--danger);">🚪 Logout</span><span>›</span>
+  </div>
+  
+  <button class="btn btn-secondary btn-full" onclick="toggleSettings()" style="margin-top:20px;">✖ Tutup</button>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-content" id="modalContent"></div>
+</div>
+
+<script>
+// ==================== SECURITY & STORAGE ====================
+const STORAGE_KEY = 'jpnMasterN5_v1';
+const SALT = 'JPN_N5_MASTER_2024';
+
+function encrypt(data) {
+  try {
+    const str = JSON.stringify(data);
+    let encoded = btoa(unescape(encodeURIComponent(str + SALT)));
+    return encoded;
+  } catch(e) { return null; }
+}
+
+function decrypt(str) {
+  try {
+    let decoded = decodeURIComponent(escape(atob(str)));
+    const data = decoded.replace(SALT, '');
+    return JSON.parse(data);
+  } catch(e) { return null; }
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, encrypt(data));
+}
+
+function loadData() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return null;
+  return decrypt(raw);
+}
+
+function sanitize(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ==================== APP STATE ====================
+let appState = loadData() || {
+  user: null,
+  currentLevel: 1,
+  levels: {},
+  settings: {
+    theme: 'sakura',
+    language: 'id',
+    volume: 80,
+    music: 'sakura',
+    sfx: true
+  },
+  stats: {
+    totalAnswers: 0,
+    correctAnswers: 0,
+    streak: 0
+  }
+};
+
+// Initialize levels
+for (let i = 1; i <= 35; i++) {
+  if (!appState.levels[i]) {
+    appState.levels[i] = {
+      status: i === 1 ? 'available' : 'locked',
+      answers: {},
+      srs: { phase1: null, phase2: null, phase3: null },
+      completed: false,
+      score: 0,
+      lastAttempt: null
+    };
+  }
+}
+
+saveData(appState);
+
+// ==================== LEVELS DATA ====================
+const levelsData = {
+  1: {
+    title: "Level 1: Hiragana Dasar (あ-の)",
+    explanation: `<h3>📖 Hiragana Dasar (あ〜の)</h3>
+<p>Hiragana adalah sistem tulisan paling dasar dalam Bahasa Jepang. Setiap karakter mewakili satu suku kata.</p>
+<h4>25 Karakter Pertama:</h4>
+<div class="japanese-text">
+あ(a) い(i) う(u) え(e) お(o)<br>
+か(ka) き(ki) く(ku) け(ke) こ(ko)<br>
+さ(sa) し(shi) す(su) せ(se) そ(so)<br>
+た(ta) ち(chi) つ(tsu) て(te) と(to)<br>
+な(na) に(ni) ぬ(nu) ね(ne) の(no)
+</div>
+<h4>Cara Menghafal:</h4>
+<ul>
+<li><strong>Vokal:</strong> あいうえお = a-i-u-e-o (urutan selalu sama)</li>
+<li><strong>K+Vokal:</strong> かきくけこ = ka-ki-ku-ke-ko</li>
+<li><strong>S+Vokal:</strong> さしすせそ = sa-shi-su-se-so (注意: し=shi bukan si)</li>
+<li><strong>T+Vokal:</strong> たひつてと = ta-chi-tsu-te-to (注意: ち=chi, つ=tsu)</li>
+<li><strong>N+Vokal:</strong> なにぬねの = na-ni-nu-ne-no</li>
+</ul>
+<h4>💡 Tips Penting:</h4>
+<p>Hiragana digunakan untuk kata-kata asli Jepang, partikel tata bahasa, dan okurigana (akhiran kata kerja/kata sifat).</p>`,
+    questions: [
+      { q: "Bagaimana cara membaca hiragana あ?", a: "a" },
+      { q: "Bagaimana cara membaca hiragana し?", a: "shi" },
+      { q: "Bagaimana cara membaca hiragana つ?", a: "tsu" },
+      { q: "Bagaimana cara membaca hiragana ち?", a: "chi" },
+      { q: "Bagaimana cara membaca hiragana を?", a: "wo" },
+      { q: "Tuliskan romaji dari: か", a: "ka" },
+      { q: "Tuliskan romaji dari: に", a: "ni" },
+      { q: "Tuliskan romaji dari: て", a: "te" },
+      { q: "Tuliskan romaji dari: す", a: "su" },
+      { q: "Tuliskan romaji dari: へ", a: "he" },
+      { q: "Urutan vokal dalam hiragana adalah?", a: "aiueo" },
+      { q: "し dibaca 'shi' bukan 'si'. Benar atau salah?", a: "benar" },
+      { q: "つ dibaca 'tsu' bukan 'tu'. Benar atau salah?", a: "benar" },
+      { q: "Kelompok K dalam hiragana adalah ka, ki, ku, ke, ...?", a: "ko" },
+      { q: "Kelompok T dalam hiragana dimulai dengan?", a: "ta" }
+    ],
+    challenges: [
+      { q: "Tulis kata 'ai' (cinta) dalam hiragana!", a: "あい" },
+      { q: "Tulis kata 'ie' (rumah) dalam hiragana!", a: "いえ" },
+      { q: "Tulis kata 'kao' (wajah) dalam hiragana!", a: "かお" },
+      { q: "Tulis kata 'sushi' dalam hiragana!", a: "すし" },
+      { q: "Tulis kata 'neko' (kucing) dalam hiragana!", a: "ねこ" }
+    ]
+  },
+  2: {
+    title: "Level 2: Hiragana Lanjutan (は〜ん)",
+    explanation: `<h3>📖 Hiragana Lanjutan (は〜ん)</h3>
+<p>Melanjutkan 21 karakter hiragana sisanya:</p>
+<div class="japanese-text">
+は(ha) ひ(hi) ふ(fu) へ(he) ほ(ho)<br>
+ま(ma) み(mi) む(mu) め(me) も(mo)<br>
+や(ya) ゆ(yu) よ(yo)<br>
+ら(ra) り(ri) る(ru) れ(re) ろ(ro)<br>
+わ(wa) を(wo) ん(n)
+</div>
+<h4>Dakuten & Handakuten:</h4>
+<p>Dakuten (゛) mengubah suara konsonan:</p>
+<ul>
+<li>か→が(ka→ga), き→ぎ(ki→gi), く→ぐ(ku→gu)</li>
+<li>さ→ざ(sa→za), し→じ(shi→ji), す→ず(su→zu)</li>
+<li>た→だ(ta→da), ち→ぢ(chi→ji), つ→づ(tsu→zu)</li>
+<li>は→ば(ha→ba), ひ→び(hi→bi), ふ→ぶ(fu→bu)</li>
+</ul>
+<p>Handakuten (゜) hanya untuk H:</p>
+<ul><li>は→ぱ(ha→pa), ひ→ぴ(hi→pi), ふ→ぷ(fu→pu)</li></ul>
+<h4>💡 Tips:</h4>
+<p>ん(n) adalah satu-satunya karakter konsonan tunggal. を(wo) hanya digunakan sebagai partikel objek.</p>`,
+    questions: [
+      { q: "Bagaimana cara membaca hiragana ふ?", a: "fu" },
+      { q: "Bagaimana cara membaca hiragana ん?", a: "n" },
+      { q: "Dakuten mengubah か menjadi?", a: "ga" },
+      { q: "Dakuten mengubah し menjadi?", a: "ji" },
+      { q: "Handakuten mengubah は menjadi?", a: "pa" },
+      { q: "Hiragana untuk 'ha' adalah?", a: "は" },
+      { q: "Hiragana untuk 'ya' adalah?", a: "や" },
+      { q: "Hiragana untuk 'wo' adalah?", a: "を" },
+      { q: "Kelompok H dalam hiragana: ha, hi, fu, he, ...?", a: "ho" },
+      { q: "Kelompok R dalam hiragana: ra, ri, ru, re, ...?", a: "ro" },
+      { q: "Dakuten pada ta menjadi?", a: "da" },
+      { q: "Dakuten pada sa menjadi?", a: "za" },
+      { q: "Handakuten pada fu menjadi?", a: "pu" },
+      { q: "Hiragana yang hanya untuk partikel objek adalah?", a: "を" },
+      { q: "Satu-satunya konsonan tunggal dalam hiragana?", a: "ん" }
+    ],
+    challenges: [
+      { q: "Tulis kata 'hana' (bunga) dalam hiragana!", a: "はな" },
+      { q: "Tulis kata 'yama' (gunung) dalam hiragana!", a: "やま" },
+      { q: "Tulis kata 'mizu' (air) dalam hiragana!", a: "みず" },
+      { q: "Tulis kata 'sora' (langit) dalam hiragana!", a: "そら" },
+      { q: "Tulis kata 'gakusei' (murid) dengan dakuten!", a: "がくせい" }
+    ]
+  },
+  3: {
+    title: "Level 3: Katakana Dasar (ア〜ノ)",
+    explanation: `<h3>📖 Katakana Dasar (ア〜ノ)</h3>
+<p>Katakana digunakan untuk kata-kata serapan asing, nama orang asing, onomatopoeia, dan penekanan.</p>
+<h4>25 Karakter Pertama:</h4>
+<div class="japanese-text">
+ア(a) イ(i) ウ(u) エ(e) オ(o)<br>
+カ(ka) キ(ki) ク(ku) ケ(ke) コ(ko)<br>
+サ(sa) シ(shi) ス(su) セ(se) ソ(so)<br>
+タ(ta) チ(chi) ツ(tsu) テ(te) ト(to)<br>
+ナ(na) ニ(ni) ヌ(nu) ネ(ne) ノ(no)
+</div>
+<h4>Perbedaan dengan Hiragana:</h4>
+<ul>
+<li>Bentuknya lebih lurus dan bersudut</li>
+<li>Setiap karakter katakana memiliki pasangan hiragana dengan bunyi yang sama</li>
+<li>ア=あ, カ=か, サ=さ, dst.</li>
+</ul>
+<h4>Penggunaan Katakana:</h4>
+<ul>
+<li>Kata serapan: アメリカ(Amerika), コーヒー(kopi)</li>
+<li>Nama orang asing: ジョン(John), メアリー(Mary)</li>
+<li>Nama negara: インドネシア(Indonesia)</li>
+<li>Onomatopoeia: ワンワン(gukguk)</li>
+</ul>`,
+    questions: [
+      { q: "Katakana ア dibaca?", a: "a" },
+      { q: "Katakana シ dibaca?", a: "shi" },
+      { q: "Katakana ツ dibaca?", a: "tsu" },
+      { q: "Katakana チ dibaca?", a: "chi" },
+      { q: "Katakana ノ dibaca?", a: "no" },
+      { q: "Katakana untuk 'ka' adalah?", a: "カ" },
+      { q: "Katakana untuk 'na' adalah?", a: "ナ" },
+      { q: "Katakana untuk 'te' adalah?", a: "テ" },
+      { q: "Katakana untuk 'su' adalah?", a: "ス" },
+      { q: "Katakana untuk 'ho' adalah?", a: "ホ" },
+      { q: "Katakana digunakan untuk?", a: "kata serapan" },
+      { q: "Bentuk katakana lebih ... dibanding hiragana?", a: "lurus" },
+      { q: "Pasangan hiragana dari カ adalah?", a: "か" },
+      { q: "'Amerika' dalam katakana dimulai dengan?", a: "ア" },
+      { q: "Katakana untuk 'fu' adalah?", a: "フ" }
+    ],
+    challenges: [
+      { q: "Tulis 'kopi' (coffee) dalam katakana!", a: "コーヒー" },
+      { q: "Tulis 'taxi' dalam katakana!", a: "タクシー" },
+      { q: "Tulis 'bus' dalam katakana!", a: "バス" },
+      { q: "Tulis 'pen' dalam katakana!", a: "ペン" },
+      { q: "Tulis 'nama' (nama) dalam katakana!", a: "ナマ" }
+    ]
+  }
+};
+
+// Generate placeholder content for levels 4-35
+const levelTopics = [
+  "Angka 1-100", "Angka 100-10000 & Penghitung", "Waktu & Jam", "Hari & Bulan",
+  "Partikel は (wa)", "Partikel が (ga)", "Partikel を (wo)", "Partikel に (ni)",
+  "Partikel で (de)", "Partikel へ (he)", "Partikel と (to)", "Partikel の (no)",
+  "Kata Benda: Keluarga", "Kata Benda: Tempat", "Kata Benda: Makanan",
+  "Salam & Ekspresi", "Kata Kerja: Bentuk Kamus", "Kata Kerja: Bentuk Masu",
+  "Kata Kerja: Bentuk Te (て)", "Kata Kerja: Bentuk Nai (ない)", "Kata Kerja: Bentuk Ta (た)",
+  "Kata Sifat-i", "Kata Sifat-na", "Kalimat Tanya", "Kalimat Negatif",
+  "Kata Keterangan", "Kata Sambung", "Ekspresi: ~たい (ingin)", "Ekspresi: ~てください",
+  "Reading Practice 1", "Reading Practice 2", "Mock Test N5 Part 1", "Mock Test N5 Part 2",
+  "Review Final N5"
+];
+
+for (let i = 4; i <= 35; i++) {
+  if (!levelsData[i]) {
+    levelsData[i] = {
+      title: `Level ${i}: ${levelTopics[i-4] || 'Materi Lanjutan'}`,
+      explanation: `<h3>📖 ${levelTopics[i-4] || 'Materi Lanjutan'}</h3>
+<p>Materi untuk level ini akan segera ditambahkan. Ini adalah bagian penting dari persiapan JLPT N5.</p>
+<h4>Apa yang akan dipelajari:</h4>
+<ul>
+<li>Konsep dasar dan penggunaan praktis</li>
+<li>Contoh kalimat dalam konteks sehari-hari</li>
+<li>Pola dan aturan yang perlu dihafal</li>
+<li>Tips untuk mengerjakan soal JLPT N5</li>
+</ul>
+<h4>💡 Tips Belajar:</h4>
+<p>Pastikan Anda sudah memahami materi level sebelumnya dengan baik sebelum melanjutkan ke level ini. Gunakan metode SRS untuk review berkala.</p>`,
+      questions: Array.from({length:15}, (_,j) => ({
+        q: `Pertanyaan ${j+1}: Apa yang Anda ketahui tentang ${levelTopics[i-4]}?`,
+        a: "jawaban akan ditambahkan"
+      })),
+      challenges: Array.from({length:5}, (_,j) => ({
+        q: `Tantangan ${j+1}: Praktikkan penggunaan ${levelTopics[i-4]} dalam kalimat!`,
+        a: "jawaban akan ditambahkan"
+      }))
+    };
+  }
+}
+
+// ==================== i18n (Internationalization) ====================
+const translations = {
+  id: {
+    welcome: "Selamat Datang",
+    progress: "Progress Keseluruhan",
+    selectLevel: "Pilih Level",
+    back: "Kembali",
+    submit: "Kirim Semua Jawaban",
+    submitShort: "📤 Kirim",
+    answered: "Sudah Dijawab",
+    correct: "✓ Benar!",
+    incorrect: "✗ Salah. Jawaban benar:",
+    redo: "Kerjakan Ulang",
+    complete: "✓ Tandai Selesai & Kembali",
+    locked: "Terkunci",
+    available: "Tersedia",
+    completed: "Selesai",
+    srsActive: "SRS Aktif",
+    publisher: "Penerbit: Renald Rasyad Aryasatya",
+    version: "Versi: 1.0.0"
+  },
+  en: {
+    welcome: "Welcome",
+    progress: "Overall Progress",
+    selectLevel: "Select Level",
+    back: "Back",
+    submit: "Submit All Answers",
+    submitShort: "📤 Submit",
+    answered: "Answered",
+    correct: "✓ Correct!",
+    incorrect: "✗ Wrong. Correct answer:",
+    redo: "Redo",
+    complete: "✓ Mark Complete & Return",
+    locked: "Locked",
+    available: "Available",
+    completed: "Completed",
+    srsActive: "SRS Active",
+    publisher: "Publisher: Renald Rasyad Aryasatya",
+    version: "Version: 1.0.0"
+  }
+};
+
+function t(key) {
+  return translations[appState.settings.language]?.[key] || translations.id[key] || key;
+}
+
+// ==================== AUDIO SYSTEM ====================
+let audioCtx = null;
+let currentMusic = null;
+let musicGain = null;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    musicGain = audioCtx.createGain();
+    musicGain.gain.value = appState.settings.volume / 100;
+    musicGain.connect(audioCtx.destination);
+  }
+}
+
+function playNote(freq, duration, startTime, type='sine') {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.3, startTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+  osc.connect(gain);
+  gain.connect(musicGain);
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+}
+
+function playSakura() {
+  initAudio();
+  if (currentMusic) currentMusic.stop();
+  
+  const notes = [392, 440, 494, 523, 587, 523, 494, 440, 392, 440, 494, 523];
+  const duration = 0.5;
+  let startTime = audioCtx.currentTime;
+  
+  const playLoop = () => {
+    notes.forEach((note, i) => {
+      playNote(note, duration * 0.8, startTime + i * duration);
+    });
+    startTime += notes.length * duration;
+    currentMusic = setTimeout(playLoop, notes.length * duration * 1000 - 500);
+  };
+  playLoop();
+}
+
+function playTabun() {
+  initAudio();
+  if (currentMusic) currentMusic.stop();
+  
+  const notes = [523, 587, 659, 698, 784, 698, 659, 587, 523, 494, 523, 587];
+  const duration = 0.4;
+  let startTime = audioCtx.currentTime;
+  
+  const playLoop = () => {
+    notes.forEach((note, i) => {
+      playNote(note, duration * 0.7, startTime + i * duration, 'triangle');
+    });
+    startTime += notes.length * duration;
+    currentMusic = setTimeout(playLoop, notes.length * duration * 1000 - 500);
+  };
+  playLoop();
+}
+
+function playNightDancer() {
+  initAudio();
+  if (currentMusic) currentMusic.stop();
+  
+  const notes = [440, 494, 523, 587, 523, 494, 440, 392, 440, 494, 523, 587];
+  const duration = 0.35;
+  let startTime = audioCtx.currentTime;
+  
+  const playLoop = () => {
+    notes.forEach((note, i) => {
+      playNote(note, duration * 0.8, startTime + i * duration, 'square');
+    });
+    startTime += notes.length * duration;
+    currentMusic = setTimeout(playLoop, notes.length * duration * 1000 - 500);
+  };
+  playLoop();
+}
+
+function stopMusic() {
+  if (currentMusic) {
+    clearTimeout(currentMusic);
+    currentMusic = null;
+  }
+}
+
+function changeMusic(type) {
+  stopMusic();
+  appState.settings.music = type;
+  saveData(appState);
+  
+  if (type === 'sakura') playSakura();
+  else if (type === 'tabun') playTabun();
+  else if (type === 'nightdancer') playNightDancer();
+}
+
+function playSFX() {
+  if (!appState.settings.sfx) return;
+  initAudio();
+  
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.1);
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.1);
+}
+
+function setVolume(val) {
+  appState.settings.volume = parseInt(val);
+  if (musicGain) musicGain.gain.value = val / 100;
+  saveData(appState);
+}
+
+function toggleSFX(checked) {
+  appState.settings.sfx = checked;
+  saveData(appState);
+}
+
+// ==================== THEME SYSTEM ====================
+function applyTheme(theme) {
+  document.body.className = `theme-${theme}`;
+  appState.settings.theme = theme;
+  saveData(appState);
+  
+  // Remove existing animations
+  document.querySelectorAll('.sakura-petal').forEach(el => el.remove());
+  
+  if (theme === 'sakura') {
+    for (let i = 0; i < 20; i++) {
+      setTimeout(() => {
+        const petal = document.createElement('div');
+        petal.className = 'sakura-petal';
+        petal.style.left = Math.random() * 100 + 'vw';
+        petal.style.animationDuration = (Math.random() * 3 + 4) + 's';
+        petal.style.animationDelay = Math.random() * 5 + 's';
+        document.body.appendChild(petal);
+      }, i * 200);
+    }
+  }
+}
+
+function showThemes() {
+  showModal(`
+    <h3>🎨 Pilih Tema</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:15px;">
+      <button class="btn btn-primary" onclick="applyTheme('sakura');closeModal();">🌸 Sakura (Animasi Kelopak)</button>
+      <button class="btn btn-success" onclick="applyTheme('bamboo');closeModal();">🎋 Bamboo (Animasi Bambu)</button>
+      <button class="btn btn-secondary" onclick="applyTheme('night');closeModal();">🌙 Night (Animasi Bintang)</button>
+    </div>
+    <button class="btn btn-secondary btn-full" onclick="closeModal()" style="margin-top:15px;">Tutup</button>
+  `);
+}
+
+// ==================== AUTH SYSTEM ====================
+let loginAttempts = 0;
+let lastLoginAttempt = 0;
+
+function showRegister() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('registerForm').style.display = 'block';
+}
+
+function showLogin() {
+  document.getElementById('loginForm').style.display = 'block';
+  document.getElementById('registerForm').style.display = 'none';
+}
+
+function register() {
+  const name = sanitize(document.getElementById('regName').value.trim());
+  const email = sanitize(document.getElementById('regEmail').value.trim().toLowerCase());
+  const password = document.getElementById('regPassword').value;
+  const confirm = document.getElementById('regConfirm').value;
+  
+  if (!name || !email || !password) {
+    showModal('<h3>⚠️ Error</h3><p>Semua field harus diisi!</p><button class="btn btn-primary btn-full" onclick="closeModal()">OK</button>');
+    return;
+  }
+  if (!email.includes('@gmail.com')) {
+    showModal('<h3>⚠️ Error</h3><p>Gunakan email Gmail!</p><button class="btn btn-primary btn-full" onclick="closeModal()">OK</button>');
+    return;
+  }
+  if (password.length < 6) {
+    showModal('<h3>⚠️ Error</h3><p>Password minimal 6 karakter!</p><button class="btn btn-primary btn-full" onclick="closeModal()">OK</button>');
+    return;
+  }
+  if (password !== confirm) {
+    showModal('<h3>⚠️ Error</h3><p>Password tidak cocok!</p><button class="btn btn-primary btn-full" onclick="closeModal()">OK</button>');
+    return;
+  }
+  
+  appState.user = { name, email, isGuest: false };
+  saveData(appState);
+  enterApp();
+}
+
+function login() {
+  // Rate limiting
+  const now = Date.now();
+  if (now - lastLoginAttempt < 1000) {
+    showModal('<h3>⚠️ Terlalu Cepat</h3><p>Tunggu sebentar!</p><button class="btn btn-primary btn-full" onclick="closeModal()">OK</button>');
+    return;
+  }
+  lastLoginAttempt = now;
+  
+  if (loginAttempts >= 5) {
+    showModal('<h3>⚠️ Terlalu Banyak Percobaan</h3><p>Coba lagi nanti atau gunakan Guest Account.</p><button class="btn btn-primary btn-full" onclick="closeModal()">OK</button>');
+    return;
+  }
+  
+  const email = sanitize(document.getElementById('loginEmail').value.trim().toLowerCase());
+  const password = document.getElementById('loginPassword').value;
+  
+  if (!email || !password) {
+    showModal('<h3>⚠️ Error</h3><p>Email dan password harus diisi!</p><button class="btn btn-primary btn-full" onclick="closeModal()">OK</button>');
+    loginAttempts++;
+    return;
+  }
+  
+  // Simple validation (in production, use server-side auth)
+  if (!email.includes('@gmail.com') || password.length < 6) {
+    showModal('<h3>⚠️ Error</h3><p>Email atau password salah!</p><button class="btn btn-primary btn-full" onclick="closeModal()">OK</button>');
+    loginAttempts++;
+    return;
+  }
+  
+  appState.user = { name: email.split('@')[0], email, isGuest: false };
+  saveData(appState);
+  loginAttempts = 0;
+  enterApp();
+}
+
+function guestLogin() {
+  appState.user = { name: 'Guest', email: '', isGuest: true };
+  saveData(appState);
+  enterApp();
+}
+
+function enterApp() {
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('homeScreen').classList.add('active');
+  renderHome();
+  applyTheme(appState.settings.theme);
+}
+
+function logout() {
+  showModal(`
+    <h3>🚪 Logout</h3>
+    <p>Yakin ingin logout?</p>
+    <div class="modal-buttons">
+      <button class="btn btn-secondary" onclick="closeModal()">Tolak</button>
+      <button class="btn btn-primary" onclick="doLogout()">Terima</button>
+    </div>
+  `);
+}
+
+function doLogout() {
+  stopMusic();
+  appState.user = null;
+  saveData(appState);
+  document.getElementById('homeScreen').classList.remove('active');
+  document.getElementById('levelScreen').classList.remove('active');
+  document.getElementById('loginScreen').classList.add('active');
+  closeModal();
+}
+
+// ==================== HOME SCREEN ====================
+function renderHome() {
+  const welcome = document.getElementById('welcomeText');
+  welcome.textContent = `${t('welcome')}, ${appState.user.name}!`;
+  
+  // Calculate progress
+  const completed = Object.values(appState.levels).filter(l => l.completed).length;
+  const percent = Math.round((completed / 35) * 100);
+  document.getElementById('progressFill').style.width = percent + '%';
+  document.getElementById('progressFill').textContent = percent + '%';
+  
+  // Render levels
+  const grid = document.getElementById('levelsGrid');
+  grid.innerHTML = '';
+  
+  for (let i = 1; i <= 35; i++) {
+    const level = appState.levels[i];
+    let statusClass = '';
+    let statusText = '';
+    let statusBadge = '';
+    
+    if (level.completed) {
+      statusClass = 'completed';
+      statusText = t('completed');
+      statusBadge = 'status-completed';
+    } else if (level.status === 'available') {
+      statusClass = '';
+      statusText = t('available');
+      statusBadge = 'status-available';
+    } else if (level.srs.phase1 || level.srs.phase2 || level.srs.phase3) {
+      statusClass = 'active-phase';
+      statusText = t('srsActive');
+      statusBadge = 'status-srs';
+    } else {
+      statusClass = 'locked';
+      statusText = t('locked');
+      statusBadge = 'status-locked';
+    }
+    
+    const adBadge = i >= 18 ? '<div class="ad-badge">AD</div>' : '';
+    
+    const card = document.createElement('div');
+    card.className = `level-card ${statusClass}`;
+    card.innerHTML = `
+      ${adBadge}
+      <div class="level-num">${i}</div>
+      <h3>Level ${i}</h3>
+      <span class="status ${statusBadge}">${statusText}</span>
+    `;
+    
+    if (level.status === 'available' || level.completed || level.srs.phase1 || level.srs.phase2 || level.srs.phase3) {
+      card.onclick = () => openLevel(i);
+    }
+    
+    grid.appendChild(card);
+  }
+}
+
+function goHome() {
+  stopMusic();
+  document.getElementById('levelScreen').classList.remove('active');
+  document.getElementById('homeScreen').classList.add('active');
+  renderHome();
+}
+
+// ==================== LEVEL SCREEN ====================
+let currentLevel = null;
+let answeredQuestions = {};
+let srsIntervals = [];
+
+function openLevel(num) {
+  currentLevel = num;
+  playSFX();
+  
+  document.getElementById('homeScreen').classList.remove('active');
+  document.getElementById('levelScreen').classList.add('active');
+  
+  const level = levelsData[num];
+  document.getElementById('levelTitle').textContent = level.title;
+  document.getElementById('explanation').innerHTML = level.explanation;
+  
+  renderQuestions();
+  renderChallenges();
+  
+  answeredQuestions = {};
+  
+  // Check SRS state
+  checkSRSState();
+}
+
+function renderQuestions() {
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = '';
+  
+  const level = levelsData[currentLevel];
+  level.questions.forEach((q, i) => {
+    const block = document.createElement('div');
+    block.className = 'question-block';
+    block.id = `q-${i}`;
+    block.innerHTML = `
+      <h4>Pertanyaan ${i+1}:</h4>
+      <p>${sanitize(q.q)}</p>
+      <input type="text" class="answer-input" id="ans-${i}" placeholder="Ketik jawaban Anda..." onkeypress="if(event.key==='Enter')answerQuestion(${i})">
+      <button class="btn btn-primary" onclick="answerQuestion(${i})" style="margin-top:8px;">Jawab</button>
+      <div class="correction" id="corr-${i}"></div>
+    `;
+    container.appendChild(block);
+  });
+}
+
+function renderChallenges() {
+  const container = document.getElementById('challengesContainer');
+  container.innerHTML = '';
+  
+  const level = levelsData[currentLevel];
+  level.challenges.forEach((c, i) => {
+    const block = document.createElement('div');
+    block.className = 'question-block';
+    block.id = `ch-${i}`;
+    block.innerHTML = `
+      <h4>Tantangan ${i+1}:</h4>
+      <p>${sanitize(c.q)}</p>
+      <input type="text" class="answer-input" id="chans-${i}" placeholder="Ketik jawaban Anda..." onkeypress="if(event.key==='Enter')answerChallenge(${i})">
+      <button class="btn btn-primary" onclick="answerChallenge(${i})" style="margin-top:8px;">Jawab</button>
+      <div class="correction" id="chcorr-${i}"></div>
+    `;
+    container.appendChild(block);
+  });
+}
+
+function answerQuestion(index) {
+  playSFX();
+  const input = document.getElementById(`ans-${index}`);
+  const value = sanitize(input.value.trim());
+  
+  if (!value) {
+    showModal('<h3>⚠️ Kosong</h3><p>Isi jawaban terlebih dahulu!</p><button class="btn btn-primary btn-full" onclick="closeModal()">OK</button>');
+    return;
+  }
+  
+  answeredQuestions[`q-${index}`] = value;
+  
+  const block = document.getElementById(`q-${index}`);
+  block.classList.add('answered-flash');
+  
+  // Show "Sudah Dijawab" animation WITHOUT changing appearance
+  const btn = block.querySelector('button');
+  const originalText = btn.textContent;
+  btn.textContent = `✓ ${t('answered')}`;
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  
+  setTimeout(() => {
+    block.classList.remove('answered-flash');
+  }, 500);
+}
+
+function answerChallenge(index) {
+  playSFX();
+  const input = document.getElementById(`chans-${index}`);
+  const value = sanitize(input.value.trim());
+  
+  if (!value) {
+    showModal('<h3>⚠️ Kosong</h3><p>Isi jawaban terlebih dahulu!</p><button class="btn btn-primary btn-full" onclick="closeModal()">OK</button>');
+    return;
+  }
+  
+  answeredQuestions[`ch-${index}`] = value;
+  
+  const block = document.getElementById(`ch-${index}`);
+  block.classList.add('answered-flash');
+  
+  const btn = block.querySelector('button');
+  btn.textContent = `✓ ${t('answered')}`;
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  
+  setTimeout(() => {
+    block.classList.remove('answered-flash');
+  }, 500);
+}
+
+function submitAllAnswers() {
+  playSFX();
+  
+  // Check if all questions are answered
+  const level = levelsData[currentLevel];
+  let allAnswered = true;
+  let unansweredCount = 0;
+  
+  level.questions.forEach((q, i) => {
+    if (!answeredQuestions[`q-${i}`]) {
+      allAnswered = false;
+      unansweredCount++;
+    }
+  });
+  
+  level.challenges.forEach((c, i) => {
+    if (!answeredQuestions[`ch-${i}`]) {
+      allAnswered = false;
+      unansweredCount++;
+    }
+  });
+  
+  if (!allAnswered) {
+    showModal(`
+      <h3>⚠️ Belum Selesai</h3>
+      <p>Masih ada ${unansweredCount} pertanyaan yang belum dijawab!</p>
+      <p>Jawab semua pertanyaan terlebih dahulu.</p>
+      <button class="btn btn-primary btn-full" onclick="closeModal()">OK</button>
+    `);
+    return;
+  }
+  
+  // NOW show corrections
+  let correct = 0;
+  let total = 0;
+  
+  level.questions.forEach((q, i) => {
+    const userAnswer = (answeredQuestions[`q-${i}`] || '').toLowerCase().trim();
+    const correctAnswer = q.a.toLowerCase().trim();
+    const isCorrect = userAnswer === correctAnswer || userAnswer.includes(correctAnswer) || correctAnswer.includes(userAnswer);
+    
+    const block = document.getElementById(`q-${i}`);
+    const corr = document.getElementById(`corr-${i}`);
+    
+    if (isCorrect) {
+      block.classList.add('correct');
+      corr.classList.add('correct', 'show');
+      corr.textContent = t('correct');
+      correct++;
+    } else {
+      block.classList.add('incorrect');
+      corr.classList.add('incorrect', 'show');
+      corr.textContent = `${t('incorrect')} ${q.a}`;
+    }
+    total++;
+  });
+  
+  level.challenges.forEach((c, i) => {
+    const userAnswer = (answeredQuestions[`ch-${i}`] || '').toLowerCase().trim();
+    const correctAnswer = c.a.toLowerCase().trim();
+    const isCorrect = userAnswer === correctAnswer || userAnswer.includes(correctAnswer) || correctAnswer.includes(userAnswer);
+    
+    const block = document.getElementById(`ch-${i}`);
+    const corr = document.getElementById(`chcorr-${i}`);
+    
+    if (isCorrect) {
+      block.classList.add('correct');
+      corr.classList.add('correct', 'show');
+      corr.textContent = t('correct');
+      correct++;
+    } else {
+      block.classList.add('incorrect');
+      corr.classList.add('incorrect', 'show');
+      corr.textContent = `${t('incorrect')} ${c.a}`;
+    }
+    total++;
+  });
+  
+  const score = Math.round((correct / total) * 100);
+  
+  // Save answers
+  appState.levels[currentLevel].answers = { ...answeredQuestions };
+  appState.levels[currentLevel].score = score;
+  appState.levels[currentLevel].lastAttempt = Date.now();
+  appState.stats.totalAnswers += total;
+  appState.stats.correctAnswers += correct;
+  
+  // Start SRS Phase 1
+  if (!appState.levels[currentLevel].srs.phase1) {
+    appState.levels[currentLevel].srs.phase1 = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+  }
+  
+  saveData(appState);
+  
+  showModal(`
+    <h3>📊 Hasil Evaluasi</h3>
+    <p style="font-size:24px;font-weight:bold;color:var(--accent);margin:15px 0;">${score}%</p>
+    <p>Benar: ${correct} / ${total}</p>
+    <p style="margin-top:10px;color:var(--success);">SRS Fase 1 dimulai! Review dalam 24 jam.</p>
+    <button class="btn btn-primary btn-full" onclick="closeModal();checkSRSState();">OK</button>
+  `);
+  
+  // Send feedback for levels 1, 18, 35
+  if ([1, 18, 35].includes(currentLevel)) {
+    sendLevelFeedback();
+  }
+}
+
+function checkSRSState() {
+  const level = appState.levels[currentLevel];
+  const now = Date.now();
+  
+  // Clear expired intervals
+  srsIntervals.forEach(i => clearInterval(i));
+  srsIntervals = [];
+  
+  const srsSection = document.getElementById('srsSection');
+  const checklistBox = document.getElementById('checklistBox');
+  
+  if (level.lastAttempt) {
+    srsSection.style.display = 'block';
+    
+    // Phase 1
+    if (level.srs.phase1) {
+      updateCountdown('countdown1', level.srs.phase1, 'redoBtn1', 1);
+    }
+    
+    // Phase 2
+    if (level.srs.phase2) {
+      updateCountdown('countdown2', level.srs.phase2, 'redoBtn2', 2);
+    }
+    
+    // Phase 3
+    if (level.srs.phase3) {
+      updateCountdown('countdown3', level.srs.phase3, 'redoBtn3', 3);
+    }
+    
+    // Check if all phases completed
+    if (!level.srs.phase1 && !level.srs.phase2 && !level.srs.phase3) {
+      checklistBox.style.display = 'block';
+    } else {
+      checklistBox.style.display = 'none';
+    }
+  }
+}
+
+function updateCountdown(elementId, targetTime, buttonId, phase) {
+  const el = document.getElementById(elementId);
+  const btn = document.getElementById(buttonId);
+  
+  const interval = setInterval(() => {
+    const now = Date.now();
+    const diff = targetTime - now;
+    
+    if (diff <= 0) {
+      el.textContent = 'Waktu Review!';
+      btn.disabled = false;
+      btn.style.background = 'var(--success)';
+      
+      // Reset level answers for this phase
+      appState.levels[currentLevel].answers = {};
+      appState.levels[currentLevel].lastAttempt = null;
+      appState.levels[currentLevel].score = 0;
+      saveData(appState);
+      
+      clearInterval(interval);
+      return;
+    }
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    el.textContent = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    btn.disabled = true;
+  }, 1000);
+  
+  srsIntervals.push(interval);
+}
+
+function redoLevel(phase) {
+  playSFX();
+  const level = appState.levels[currentLevel];
+  
+  if (phase === 1 && level.srs.phase1) {
+    level.srs.phase1 = null;
+    level.srs.phase2 = Date.now() + (72 * 60 * 60 * 1000); // 72 hours
+  } else if (phase === 2 && level.srs.phase2) {
+    level.srs.phase2 = null;
+    level.srs.phase3 = Date.now() + (168 * 60 * 60 * 1000); // 168 hours
+  } else if (phase === 3 && level.srs.phase3) {
+    level.srs.phase3 = null;
+  }
+  
+  saveData(appState);
+  openLevel(currentLevel); // Refresh level
+}
+
+function completeLevel() {
+  playSFX();
+  appState.levels[currentLevel].completed = true;
+  appState.levels[currentLevel].status = 'completed';
+  
+  // Unlock next level
+  if (currentLevel < 35) {
+    appState.levels[currentLevel + 1].status = 'available';
+  }
+  
+  saveData(appState);
+  
+  showModal(`
+    <h3>🎉 Selamat!</h3>
+    <p>Level ${currentLevel} telah diselesaikan dengan sempurna!</p>
+    <p style="margin-top:10px;">Semua fase SRS telah dilalui.</p>
+    <button class="btn btn-primary btn-full" onclick="closeModal();goHome();">Kembali ke Beranda</button>
+  `);
+}
+
+function refreshLevel() {
+  playSFX();
+  if (currentLevel) {
+    openLevel(currentLevel);
+  }
+}
+
+// ==================== SETTINGS ====================
+function toggleSettings() {
+  playSFX();
+  const panel = document.getElementById('settingsPanel');
+  const overlay = document.getElementById('settingsOverlay');
+  
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    overlay.classList.remove('show');
+  } else {
+    panel.classList.add('open');
+    overlay.classList.add('show');
+  }
+}
+
+function showProfile() {
+  showModal(`
+    <h3>👤 Profil</h3>
+    <div class="stat-card">
+      <h4>Nama</h4>
+      <div class="value">${appState.user.name}</div>
+    </div>
+    <div class="stat-card">
+      <h4>Email</h4>
+      <div class="value" style="font-size:14px;">${appState.user.email || 'Guest Account'}</div>
+    </div>
+    <div class="stat-card">
+      <h4>Status</h4>
+      <div class="value" style="font-size:16px;">${appState.user.isGuest ? '👤 Guest' : '📧 Gmail User'}</div>
+    </div>
+    <button class="btn btn-secondary btn-full" onclick="closeModal()">Tutup</button>
+  `);
+}
+
+function showLanguage() {
+  showModal(`
+    <h3>🌐 Pilih Bahasa</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:15px;">
+      <button class="btn btn-primary" onclick="changeLanguage('id');closeModal();">🇮🇩 Bahasa Indonesia</button>
+      <button class="btn btn-primary" onclick="changeLanguage('en');closeModal();">🇬🇧 English</button>
+    </div>
+    <button class="btn btn-secondary btn-full" onclick="closeModal()" style="margin-top:15px;">Tutup</button>
+  `);
+}
+
+function changeLanguage(lang) {
+  appState.settings.language = lang;
+  saveData(appState);
+  renderHome();
+  if (currentLevel) openLevel(currentLevel);
+}
+
+function refreshApp() {
+  playSFX();
+  location.reload();
+}
+
+function showStats() {
+  const completed = Object.values(appState.levels).filter(l => l.completed).length;
+  const accuracy = appState.stats.totalAnswers > 0 ? Math.round((appState.stats.correctAnswers / appState.stats.totalAnswers) * 100) : 0;
+  
+  showModal(`
+    <h3>📊 Statistik Anda</h3>
+    <div class="stat-card">
+      <h4>Level Selesai</h4>
+      <div class="value">${completed} / 35</div>
+    </div>
+    <div class="stat-card">
+      <h4>Total Jawaban</h4>
+      <div class="value">${appState.stats.totalAnswers}</div>
+    </div>
+    <div class="stat-card">
+      <h4>Jawaban Benar</h4>
+      <div class="value">${appState.stats.correctAnswers}</div>
+    </div>
+    <div class="stat-card">
+      <h4>Akurasi</h4>
+      <div class="value">${accuracy}%</div>
+    </div>
+    <button class="btn btn-secondary btn-full" onclick="closeModal()">Tutup</button>
+  `);
+}
+
+function sendFeedback() {
+  const subject = encodeURIComponent(`Feedback Japanese Master N5 - ${appState.user.name}`);
+  const body = encodeURIComponent(`Nama: ${appState.user.name}\nEmail: ${appState.user.email || 'Guest'}\nLevel Terakhir: ${currentLevel || '-'}\n\nFeedback:\n`);
+  window.open(`mailto:renaldaccforworks@gmail.com?subject=${subject}&body=${body}`);
+}
+
+function sendLevelFeedback() {
+  const level = levelsData[currentLevel];
+  const score = appState.levels[currentLevel].score;
+  const subject = encodeURIComponent(`[Level ${currentLevel} Selesai] Japanese Master N5`);
+  const body = encodeURIComponent(
+    `User: ${appState.user.name} (${appState.user.email || 'Guest'})\n` +
+    `Level: ${currentLevel} - ${level.title}\n` +
+    `Score: ${score}%\n` +
+    `Total Answers: ${appState.stats.totalAnswers}\n` +
+    `Correct: ${appState.stats.correctAnswers}\n` +
+    `Time: ${new Date().toLocaleString()}\n\n` +
+    `Level ${currentLevel} telah diselesaikan!`
+  );
+  
+  // Silent feedback - don't open mail client
+  const img = new Image();
+  img.src = `mailto:renaldaccforworks@gmail.com?subject=${subject}&body=${body}`;
+}
+
+function resetProgress() {
+  showModal(`
+    <h3>🗑️ Reset Progress</h3>
+    <p>Yakin ingin menghapus semua progress? Tindakan ini tidak bisa dibatalkan!</p>
+    <div class="modal-buttons">
+      <button class="btn btn-secondary" onclick="closeModal()">Tolak</button>
+      <button class="btn btn-primary" onclick="doReset()">Terima</button>
+    </div>
+  `);
+}
+
+function doReset() {
+  for (let i = 1; i <= 35; i++) {
+    appState.levels[i] = {
+      status: i === 1 ? 'available' : 'locked',
+      answers: {},
+      srs: { phase1: null, phase2: null, phase3: null },
+      completed: false,
+      score: 0,
+      lastAttempt: null
+    };
+  }
+  appState.stats = { totalAnswers: 0, correctAnswers: 0, streak: 0 };
+  saveData(appState);
+  closeModal();
+  goHome();
+}
+
+// ==================== MODAL ====================
+function showModal(content) {
+  document.getElementById('modalContent').innerHTML = content;
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+// ==================== INIT ====================
+window.onload = function() {
+  // Check if user is already logged in
+  if (appState.user) {
+    enterApp();
+  }
+  
+  // Apply saved settings
+  applyTheme(appState.settings.theme);
+  document.getElementById('volumeSlider').value = appState.settings.volume;
+  document.getElementById('sfxToggle').checked = appState.settings.sfx;
+  document.getElementById('musicSelect').value = appState.settings.music;
+  
+  // Start music if saved
+  if (appState.settings.music !== 'off') {
+    document.addEventListener('click', function initMusic() {
+      if (appState.user) {
+        changeMusic(appState.settings.music);
+      }
+      document.removeEventListener('click', initMusic);
+    }, { once: true });
+  }
+};
+</script>
+</body>
+</html>
